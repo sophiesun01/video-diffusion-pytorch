@@ -943,8 +943,10 @@ class Trainer(object):
 
         while self.step < self.train_num_steps:
             for i in range(self.gradient_accumulate_every):
-                data = next(self.dl).cuda()
-
+                # data = next(self.dl).cuda() # modified
+                # print(next(self.dl)[0].shape)
+                data = next(self.dl)[0].cuda()
+                data = rearrange(data, 'b f c h w -> b c f h w')
                 with autocast(enabled = self.amp):
                     loss = self.model(
                         data,
@@ -954,7 +956,7 @@ class Trainer(object):
 
                     self.scaler.scale(loss / self.gradient_accumulate_every).backward()
 
-                print(f'{self.step}: {loss.item()}')
+                # print(f'{self.step}: {loss.item()}')
 
             log = {'loss': loss.item()}
 
